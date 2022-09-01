@@ -9,22 +9,47 @@
   <style>
     #holder {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      margin: 20px;
     }
 
+    @media screen and (max-width: 600px) {}
+
+    @media screen and (min-width: 800px) {
+      #holder {
+        grid-template-columns: repeat(3, 1fr);
+
+      }
+    }
+
+
     article {
-      margin: 20px;
+      margin: 10px;
       padding: 30px;
       border: 10px;
-      border-color: saddlebrown;
-      border-style: dotted;
-      background-color: bisque;
+      border-color: lavender;
+      border-style: double;
+      background-color: aliceblue;
       text-align: center;
+    }
+
+
+
+    h1 {
+      font-family: Arial, Helvetica, sans-serif;
+      color: rgb(100, 97, 97);
+      font-size: 30px;
     }
 
     h2 {
       font-family: Arial, Helvetica, sans-serif;
-      color: saddlebrown;
+      color: rgb(100, 97, 97);
+      font-size: 20px;
+    }
+
+    p {
+      font-family: Arial, Helvetica, sans-serif;
+      color: rgb(100, 97, 97);
+
     }
 
     img {
@@ -37,20 +62,54 @@
       height: 100vh;
       top: 0;
       left: 0;
-      opacity: 100%;
+      background-color: black;
+      /* opacity: 20%; */
       display: none;
+      /* flex? */
+      align-items: center;
+      justify-content: center;
     }
 
     #popop article {
       width: 50%;
-      background-color: white;
+      background-color: aliceblue;
+    }
+
+    button {
+      border-radius: 4px;
+      padding: 12px 28px;
+      background-color: aliceblue;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button:hover {
+      box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+      background-color: lightsteelblue;
+      color: white;
+    }
+
+    header {
+      margin-top: 10px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 70%;
+      text-align: center;
+    }
+
+    .valgt {
+      background-color: lightsteelblue;
+      color: white;
+    }
+
+    .pris {
+      font-style: italic;
     }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Babushka</h1>
+    <h1>BISTRO BABUSHKA</h1>
     <nav>
       <button data-kategori="alle" class="valgt">Alle</button>
       <button data-kategori="forretter">Forretter</button>
@@ -72,14 +131,13 @@
     </article>
   </template>
 
-  <!-- modalpopop'en. skal ikke klones og kan derfor være id -->
   <div id="popop">
     <article>
       <img src="" alt="" class="billedeurl" />
       <h2 class="navn"></h2>
       <p class="kategori"></p>
       <p class="oprindelsesregion"></p>
-      <p class="landBeskrivelse"></p>
+      <p class="langBeskrivelse"></p>
     </article>
   </div>
 
@@ -98,81 +156,62 @@
     filterKnapper.forEach((knap) =>
       knap.addEventListener("click", filtrerKategorier)
     );
-    hentData();
 
     function filtrerKategorier() {
+
       filter = this.dataset.kategori;
       document.querySelector(".valgt").classList.remove("valgt");
       this.classList.add("valgt");
-      // console.log(filter);
-      vis(data);
-      // hvot er dataset defineret?
+      displayData(data);
     }
 
     async function hentData() {
       const respons = await fetch(endpoint, mereinfo);
       data = await respons.json();
       console.log(data);
-      vis(data);
+      displayData(data);
     }
 
-    function vis(data) {
-      const main = document.querySelector("main");
+    function visRet(retData) {
+      const popop = document.querySelector("#popop");
+      popop.style.display = "flex";
+      popop.querySelector(".billedeurl").src =
+        "medium/" + retData.billednavn + "-md.jpg";
+
+      popop.querySelector("h2").textContent = retData.navn;
+      popop.querySelector(".kategori").textContent = retData.kategori;
+      popop.querySelector(".langBeskrivelse").textContent = retData.langbeskrivelse;
+      popop.querySelector(".oprindelsesregion").textContent =
+        retData.oprindelsesregion;
+
+
+      popop.addEventListener("click", () => (popop.style.display = "none"));
+    }
+
+    function displayData(input) {
+      const holder = document.querySelector("#holder");
       const template = document.querySelector("template").content;
       holder.textContent = "";
+      console.log(filter);
       data.forEach((ret) => {
-        if (filter == ret.kategori || filter == "alle") {
+        if (filter == "alle" || filter == ret.kategori) {
           const klon = template.cloneNode(true);
           klon
             .querySelector("article")
             .addEventListener("click", () => visRet(ret));
-          // heroppe defineres visDetaljers parantes, kan senere kaldes noget andet ikke-prædefineret i visDetaljers egen funktion.
           klon.querySelector(".billedeurl").src =
             "medium/" + ret.billednavn + "-md.jpg";
           klon.querySelector("h2").textContent = ret.navn;
           klon.querySelector(".kortBeskrivelse").textContent =
-            ret.kortBeskrivelse;
-          klon.querySelector(".pris").textContent = ret.pris + "kr";
+            ret.kortbeskrivelse;
+          klon.querySelector(".pris").textContent = ret.pris + " kr";
           holder.appendChild(klon);
-          // klon.querySelector(".titel").textContent += " " + person.titel;
-          // klon.querySelector(".hobby").textContent += " " + person.hobby;
-          // klon.querySelector(".troende").textContent += " " + person.troende;
-          // klon.querySelector(".fødselsdag").textContent += " " + person.fødselsdag;
+
         }
-      });
+      })
+
     }
 
-    function visRet(retData) {
-      console.log(retData);
-      const popop = document.querySelector("#popop");
-      popop.style.display = "flex";
-      popop.querySelector(".billedeurl").src =
-        "medium/" + retData.billedenavn + "-md.jpg";
-      popop.querySelector("h2").textContent = retData.navn;
-      popop.querySelector(".kategori").textContent = retData.kategori;
-      popop.querySelector(".oprindelsesregion").textContent =
-        retData.oprindelsesregion;
-      popop.querySelector(".langBeskrivelse").textContent =
-        retData.langbeskrivelse;
-      popop.addEventListener("click", () => (popop.style.display = "none"));
-    }
-
-
-    // Christine midlertidig test, rør ikke :)
-
-    // function visChristineTest(input) {
-    //   const holder = document.querySelector("#holder");
-    //   const template = document.querySelector("template").content;
-    //   holder.textContent = "";
-    //   data.forEach((madRet) => {
-    //     console.log(filter);
-    //     if (filter == "alle" || filter == madRet.kategori) {
-
-    //     }
-    //   })
-
-
-    // }
 
     hentData();
   </script>
